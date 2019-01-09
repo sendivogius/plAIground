@@ -1,0 +1,40 @@
+High = ifelse (Sales <=8," No"," Yes ")
+set.seed(2)
+Carseats = data.frame(Carseats ,High)
+tree.carseats = tree(High~.-Sales, Carseats)
+summary (tree.carseats)
+plot(tree.carseats )
+text(tree.carseats ,pretty =0)
+
+train=sample(1:nrow(Carseats), 200)
+tree.carseats = tree(High~.-Sales, Carseats, subset = train)
+Carseats.test=Carseats[-train, ]
+High.test = High[-train]
+
+tree.pred = predict(tree.carseats, Carseats.test,type = "class")
+table(tree.pred, High.test)
+mean(High.test == tree.pred)
+
+set.seed(3)
+cv.carseats = cv.tree(tree.carseats, FUN=prune.misclass)
+cv.carseats
+par(mfrow=c(1,2))
+plot(cv.carseats$size, cv.carseats$dev, type="b'")
+plot(cv.carseats$k, cv.carseats$dev, type="b")
+prune.carseats = prune.misclass(tree.carseats, best = 9)
+plot(prune.carseats)
+text(prune.carseats, pretty = 0)
+tree.pred = predict(prune.carseats, Carseats.test, type="class")
+table(tree.pred,High.test)
+mean(tree.pred==High.test)
+
+library (MASS)
+set.seed (1)
+train = sample (1: nrow(Boston ), nrow(Boston )/2)
+tree.boston =tree(medv~.,Boston ,subset =train)
+summary (tree.boston )
+cv.boston =cv.tree(tree.boston)
+plot(cv.boston$size ,cv.boston$dev ,type="b")
+prune.boston =prune.tree(tree.boston ,best =5)
+plot(prune.boston )
+text(prune.boston ,pretty =0)
